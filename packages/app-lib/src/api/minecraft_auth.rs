@@ -1,3 +1,37 @@
+use uuid::Uuid;
+
+/// Offline login: create credentials for a username (cracked/offline mode)
+#[tracing::instrument]
+pub async fn offline_login(username: &str) -> crate::Result<Credentials> {
+    use crate::state::Credentials;
+    use crate::state::MinecraftProfile;
+    use chrono::{Utc, Duration};
+
+    // Generate offline UUID (same as vanilla: UUID v3 with namespace and username)
+    let uuid = Uuid::new_v3(&Uuid::NAMESPACE_DNS, username.as_bytes());
+
+    let profile = MinecraftProfile {
+        id: uuid,
+        name: username.to_string(),
+        skins: vec![],
+        capes: vec![],
+        fetch_time: None,
+    };
+
+    let credentials = Credentials {
+        offline_profile: profile,
+        access_token: "offline".to_string(),
+        refresh_token: "offline".to_string(),
+        expires: Utc::now() + Duration::days(3650), // 10 years
+        active: true,
+    };
+
+    // Save to DB (optional, for account management)
+    let state = crate::State::get().await?;
+    credentials.upsert(&state.pool).await?;
+
+    Ok(credentials)
+}
 //! Authentication flow interface
 
 use crate::State;

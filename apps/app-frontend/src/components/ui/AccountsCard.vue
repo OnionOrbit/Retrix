@@ -43,7 +43,7 @@
       <div v-else class="logged-out account">
         <h4>Not signed in</h4>
         <Button
-          v-tooltip="'Log in'"
+          v-tooltip="'Log in with Microsoft'"
           :disabled="loginDisabled"
           icon-only
           color="primary"
@@ -52,7 +52,46 @@
           <LogInIcon v-if="!loginDisabled" />
           <SpinnerIcon v-else class="animate-spin" />
         </Button>
+        <Button
+          v-tooltip="'Log in with Offline/Cracked account'"
+          icon-only
+          color="secondary"
+          @click="showOfflineModal = true"
+        >
+          <span style="font-size: 1.5em; font-weight: bold;">O</span>
+        </Button>
       </div>
+      <ModalWrapper v-if="showOfflineModal" @close="showOfflineModal = false">
+        <template #default>
+          <div style="display: flex; flex-direction: column; gap: 1em; align-items: flex-start;">
+            <label for="offline-username">Offline Username</label>
+            <input id="offline-username" v-model="offlineUsername" placeholder="Enter username" style="padding: 0.5em; border-radius: 0.5em; border: 1px solid #ccc;" />
+            <Button color="primary" :disabled="!offlineUsername" @click="doOfflineLogin">Log in Offline</Button>
+          </div>
+        </template>
+      </ModalWrapper>
+import ModalWrapper from './modal/ModalWrapper.vue'
+import { offline_login } from '@/helpers/auth'
+const showOfflineModal = ref(false)
+const offlineUsername = ref("")
+
+async function doOfflineLogin() {
+  if (!offlineUsername.value) return
+  loginDisabled.value = true
+  try {
+    const loggedIn = await offline_login(offlineUsername.value)
+    if (loggedIn) {
+      await setAccount(loggedIn)
+      await refreshValues()
+      showOfflineModal.value = false
+      offlineUsername.value = ""
+    }
+    trackEvent('AccountLogIn', { method: 'offline' })
+  } catch (e) {
+    handleSevereError(e)
+  }
+  loginDisabled.value = false
+}
       <div v-if="displayAccounts.length > 0" class="account-group">
         <div v-for="account in displayAccounts" :key="account.profile.id" class="account-row">
           <Button class="option account" @click="setAccount(account)">
@@ -75,11 +114,11 @@
 <script setup>
 import { trackEvent } from '@/helpers/analytics'
 import {
-  get_default_user,
-  login as login_flow,
-  remove_user,
-  set_default_user,
-  users,
+    get_default_user,
+    login as login_flow,
+    remove_user,
+    set_default_user,
+    users,
 } from '@/helpers/auth'
 import { process_listener } from '@/helpers/events'
 import { getPlayerHeadUrl } from '@/helpers/rendering/batch-skin-renderer.ts'

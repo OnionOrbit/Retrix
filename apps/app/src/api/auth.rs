@@ -1,3 +1,8 @@
+/// Offline login: create credentials for a username (cracked/offline mode)
+#[tauri::command]
+pub async fn offline_login(username: String) -> Result<Credentials> {
+    Ok(minecraft_auth::offline_login(&username).await?)
+}
 use crate::api::Result;
 use chrono::{Duration, Utc};
 use tauri::plugin::TauriPlugin;
@@ -8,6 +13,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     tauri::plugin::Builder::<R>::new("auth")
         .invoke_handler(tauri::generate_handler![
             login,
+            offline_login,
             remove_user,
             get_default_user,
             set_default_user,

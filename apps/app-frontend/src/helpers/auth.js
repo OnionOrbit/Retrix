@@ -1,4 +1,12 @@
 /**
+ * Offline login: create credentials for a username (cracked/offline mode)
+ * @param {string} username
+ * @returns {Promise<Credential>}
+ */
+export async function offline_login(username) {
+  return await invoke('plugin:auth|offline_login', { username })
+}
+/**
  * All theseus API calls return serialized values (both return values and errors);
  * So, for example, addDefaultInstance creates a blank Profile object, where the Rust struct is serialized,
  *  and deserialized into a usable JS object.
