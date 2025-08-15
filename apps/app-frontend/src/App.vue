@@ -41,7 +41,6 @@ import {
   LogOutIcon,
   MaximizeIcon,
   MinimizeIcon,
-  NewspaperIcon,
   NotepadTextIcon,
   PlusIcon,
   RestoreIcon,
@@ -54,7 +53,6 @@ import {
   Avatar,
   Button,
   ButtonStyled,
-  NewsArticleCard,
   NotificationPanel,
   OverflowMenu,
   provideNotificationManager,
@@ -81,8 +79,6 @@ const notificationManager = new AppNotificationManager()
 provideNotificationManager(notificationManager)
 const { handleError, addNotification } = notificationManager
 
-const news = ref([])
-const availableSurvey = ref(false)
 
 const urlModal = ref(null)
 
@@ -198,35 +194,12 @@ async function setupApp() {
       )
     })
 
-  useFetch(`https://modrinth.com/news/feed/articles.json`, 'news', true)
-    .then((response) => response.json())
-    .then((res) => {
-      if (res && res.articles) {
-        // Format expected by NewsArticleCard component.
-        news.value = res.articles
-          .map((article) => ({
-            ...article,
-            path: article.link,
-            thumbnail: article.thumbnail,
-            title: article.title,
-            summary: article.summary,
-            date: article.date,
-          }))
-          .slice(0, 4)
-      }
-    })
 
   get_opening_command().then(handleCommand)
   checkUpdates()
   fetchCredentials()
 
-  try {
-    const skins = (await get_available_skins()) ?? []
-    const capes = (await get_available_capes()) ?? []
-    generateSkinPreviews(skins, capes)
-  } catch (error) {
-    console.warn('Failed to generate skin previews in app setup.', error)
-  }
+  // Skins/capes/skin preview logic removed
 
   if (osType === 'windows') {
     await processPendingSurveys()
@@ -562,9 +535,7 @@ async function processPendingSurveys() {
       >
         <CompassIcon />
       </NavButton>
-      <NavButton v-tooltip.right="'Skins (Beta)'" to="/skins">
-        <ChangeSkinIcon />
-      </NavButton>
+  <!-- Skins tab removed -->
       <NavButton
         v-tooltip.right="'Library'"
         to="/library"
@@ -683,28 +654,6 @@ async function processPendingSurveys() {
     :class="{ 'sidebar-enabled': sidebarVisible }"
   >
     <div class="app-viewport flex-grow router-view">
-      <transition name="popup-survey">
-        <div
-          v-if="availableSurvey"
-          class="w-[400px] z-20 fixed -bottom-12 pb-16 right-[--right-bar-width] mr-4 rounded-t-2xl card-shadow bg-bg-raised border-divider border-[1px] border-solid border-b-0 p-4"
-        >
-          <h2 class="text-lg font-extrabold mt-0 mb-2">Hey there Modrinth user!</h2>
-          <p class="m-0 leading-tight">
-            Would you mind answering a few questions about your experience with Modrinth App?
-          </p>
-          <p class="mt-3 mb-4 leading-tight">
-            This feedback will go directly to the Modrinth team and help guide future updates!
-          </p>
-          <div class="flex gap-2">
-            <ButtonStyled color="brand">
-              <button @click="openSurvey"><NotepadTextIcon /> Take survey</button>
-            </ButtonStyled>
-            <ButtonStyled>
-              <button @click="dismissSurvey"><XIcon /> No thanks</button>
-            </ButtonStyled>
-          </div>
-        </div>
-      </transition>
       <div
         class="loading-indicator-container h-8 fixed z-50"
         :style="{
@@ -762,33 +711,9 @@ async function processPendingSurveys() {
               <AccountsCard ref="accounts" mode="small" />
             </suspense>
           </div>
-          <div v-if="news && news.length > 0" class="pt-4 flex flex-col items-center">
-            <h3 class="px-4 text-lg m-0 text-left w-full">News</h3>
-            <div class="px-4 pt-2 space-y-4 flex flex-col items-center w-full">
-              <NewsArticleCard
-                v-for="(item, index) in news"
-                :key="`news-${index}`"
-                :article="item"
-              />
-              <ButtonStyled color="brand" size="large">
-                <a href="https://modrinth.com/news" target="_blank" class="my-4">
-                  <NewspaperIcon /> View all news
-                </a>
-              </ButtonStyled>
-            </div>
-          </div>
+          <!-- News section removed -->
         </div>
       </div>
-      <template v-if="showAd">
-        <a
-          href="https://modrinth.plus?app"
-          class="absolute bottom-[250px] w-full flex justify-center items-center gap-1 px-4 py-3 text-purple font-medium hover:underline z-10"
-          target="_blank"
-        >
-          <ArrowBigUpDashIcon class="text-2xl" /> Upgrade to Modrinth+
-        </a>
-        <PromotionWrapper />
-      </template>
     </div>
   </div>
   <URLConfirmModal ref="urlModal" />

@@ -55,7 +55,7 @@
           v-tooltip="'Log in with Offline/Cracked account'"
           icon-only
           color="secondary"
-          @click="showOfflineModal = true"
+          @click="showOfflineModal = true; showCard = false"
         >
           <span style="font-size: 1.5em; font-weight: bold;">O</span>
         </Button>
@@ -77,11 +77,21 @@
       </Button>
     </Card>
   </transition>
-  <ModalWrapper v-if="showOfflineModal" @close="showOfflineModal = false">
+  <ModalWrapper
+    v-if="showOfflineModal"
+    @close="showOfflineModal = false"
+    style="z-index: 100;"
+  >
     <template #default>
       <div style="display: flex; flex-direction: column; gap: 1em; align-items: flex-start;">
         <label for="offline-username">Offline Username</label>
-        <input id="offline-username" v-model="offlineUsername" placeholder="Enter username" style="padding: 0.5em; border-radius: 0.5em; border: 1px solid #ccc;" />
+        <input
+          id="offline-username"
+          ref="offlineInput"
+          v-model="offlineUsername"
+          placeholder="Enter username"
+          style="padding: 0.5em; border-radius: 0.5em; border: 1px solid #ccc;"
+        />
         <Button color="primary" :disabled="!offlineUsername" @click="doOfflineLogin">Log in Offline</Button>
       </div>
     </template>
@@ -111,6 +121,16 @@ const { handleError } = injectNotificationManager()
 
 const showOfflineModal = ref(false)
 const offlineUsername = ref("")
+const offlineInput = ref(null)
+
+watch(showOfflineModal, (newVal) => {
+  if (newVal) {
+    // Focus input after modal is rendered
+    setTimeout(() => {
+      if (offlineInput.value) offlineInput.value.focus()
+    }, 100)
+  }
+})
 
 async function doOfflineLogin() {
   if (!offlineUsername.value) return
@@ -143,28 +163,11 @@ const emit = defineEmits(['change'])
 const accounts = ref({})
 const loginDisabled = ref(false)
 const defaultUser = ref()
-const equippedSkin = ref(null)
-const headUrlCache = ref(new Map())
 
 async function refreshValues() {
   defaultUser.value = await get_default_user().catch(handleError)
   accounts.value = await users().catch(handleError)
 
-  try {
-    const skins = await get_available_skins()
-    equippedSkin.value = skins.find((skin) => skin.is_equipped)
-
-    if (equippedSkin.value) {
-      try {
-        const headUrl = await getPlayerHeadUrl(equippedSkin.value)
-        headUrlCache.value.set(equippedSkin.value.texture_key, headUrl)
-      } catch (error) {
-        console.warn('Failed to get head render for equipped skin:', error)
-      }
-    }
-  } catch {
-    equippedSkin.value = null
-  }
 }
 
 function setLoginDisabled(value) {
@@ -183,13 +186,6 @@ const displayAccounts = computed(() =>
 )
 
 const avatarUrl = computed(() => {
-  if (equippedSkin.value?.texture_key) {
-    const cachedUrl = headUrlCache.value.get(equippedSkin.value.texture_key)
-    if (cachedUrl) {
-      return cachedUrl
-    }
-    return `https://mc-heads.net/avatar/${equippedSkin.value.texture_key}/128`
-  }
   if (selectedAccount.value?.profile?.id) {
     return `https://mc-heads.net/avatar/${selectedAccount.value.profile.id}/128`
   }
@@ -197,15 +193,6 @@ const avatarUrl = computed(() => {
 })
 
 function getAccountAvatarUrl(account) {
-  if (
-    account.profile.id === selectedAccount.value?.profile?.id &&
-    equippedSkin.value?.texture_key
-  ) {
-    const cachedUrl = headUrlCache.value.get(equippedSkin.value.texture_key)
-    if (cachedUrl) {
-      return cachedUrl
-    }
-  }
   return `https://mc-heads.net/avatar/${account.profile.id}/128`
 }
 
@@ -253,17 +240,19 @@ const handleClickOutside = (event) => {
     card.value &&
     card.value.$el !== event.target &&
     !elements.includes(card.value.$el) &&
-    !button.value.contains(event.target)
+    !button.value.contains(event.target) &&
+    !showOfflineModal.value
   ) {
     toggleMenu(false)
   }
 }
 
 function toggleMenu(override = true) {
-  if (showCard.value || !override) {
-    showCard.value = false
-  } else {
+  // Only open if we're not already open and override is true
+  if (!showCard.value && override) {
     showCard.value = true
+  } else {
+    showCard.value = false
   }
 }
 
@@ -284,6 +273,30 @@ onBeforeUnmount(() => {
 onUnmounted(() => {
   unlisten()
 })
+
+async function playInstance(instanceId) {
+  const activeAccount = selectedAccount.value;
+
+  if (!activeAccount) {
+    handleError(new Error('No active account found. Please log in.'));
+    return;
+  }
+
+  if (activeAccount.profile.id === 'offline') {
+    console.info('Playing in offline mode.');
+    // Add logic to handle offline play
+  } else {
+    console.info('Playing with Microsoft account.');
+    // Add logic to handle Microsoft account play
+  }
+
+  // Proceed with launching the instance
+  try {
+    await launchInstance(instanceId, activeAccount);
+  } catch (error) {
+    handleError(error);
+  }
+}
 </script>
 
 <style scoped lang="scss">
