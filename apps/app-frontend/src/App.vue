@@ -4,7 +4,6 @@ import ModrinthLoadingIndicator from '@/components/LoadingIndicatorBar.vue'
 import AccountsCard from '@/components/ui/AccountsCard.vue'
 import Breadcrumbs from '@/components/ui/Breadcrumbs.vue'
 import ErrorModal from '@/components/ui/ErrorModal.vue'
-import FriendsList from '@/components/ui/friends/FriendsList.vue'
 import IncompatibilityWarningModal from '@/components/ui/install_flow/IncompatibilityWarningModal.vue'
 import InstallConfirmModal from '@/components/ui/install_flow/InstallConfirmModal.vue'
 import ModInstallModal from '@/components/ui/install_flow/ModInstallModal.vue'
@@ -33,7 +32,6 @@ import { useInstall } from '@/store/install.js'
 import { useLoading, useTheming } from '@/store/state'
 import {
   ArrowBigUpDashIcon,
-  ChangeSkinIcon,
   CompassIcon,
   DownloadIcon,
   HomeIcon,
@@ -762,11 +760,6 @@ async function processPendingSurveys() {
             <h3 class="text-lg m-0">Playing as</h3>
             <suspense>
               <AccountsCard ref="accounts" mode="small" />
-            </suspense>
-          </div>
-          <div class="p-4 border-0 border-b-[1px] border-[--brand-gradient-border] border-solid">
-            <suspense>
-              <FriendsList :credentials="credentials" :sign-in="() => signIn()" />
             </suspense>
           </div>
           <div v-if="news && news.length > 0" class="pt-4 flex flex-col items-center">

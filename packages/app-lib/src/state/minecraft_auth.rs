@@ -224,6 +224,10 @@ impl Credentials {
         &mut self,
         exec: impl sqlx::Executor<'_, Database = sqlx::Sqlite> + Copy,
     ) -> crate::Result<()> {
+        // If this is an offline account, do nothing
+        if self.access_token == "offline" {
+            return Ok(());
+        }
         // Use a margin of 5 minutes to give e.g. Minecraft and potentially
         // other operations that depend on a fresh token 5 minutes to complete
         // from now, and deal with some classes of clock skew
@@ -366,6 +370,10 @@ impl Credentials {
     pub async fn maybe_online_profile(
         &self,
     ) -> MaybeOnlineMinecraftProfile<'_> {
+        // If this is an offline account, never try to fetch online profile
+        if self.access_token == "offline" {
+            return MaybeOnlineMinecraftProfile::Offline(&self.offline_profile);
+        }
         let online_profile = self.online_profile().await;
         online_profile.map_or_else(
             || MaybeOnlineMinecraftProfile::Offline(&self.offline_profile),

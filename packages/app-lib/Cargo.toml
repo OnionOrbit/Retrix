@@ -13,7 +13,7 @@ serde_with.workspace = true
 sha1_smol.workspace = true
 sha2.workspace = true
 url = { workspace = true, features = ["serde"] }
-uuid = { workspace = true, features = ["serde", "v4"] }
+uuid = { workspace = true, features = ["serde", "v4", "v5"] }
 zip.workspace = true
 async_zip = { workspace = true, features = ["chrono", "tokio-fs", "deflate", "bzip2", "zstd", "deflate64"] }
 flate2.workspace = true

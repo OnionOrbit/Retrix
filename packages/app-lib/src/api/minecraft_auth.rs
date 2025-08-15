@@ -8,7 +8,8 @@ pub async fn offline_login(username: &str) -> crate::Result<Credentials> {
     use chrono::{Utc, Duration};
 
     // Generate offline UUID (same as vanilla: UUID v3 with namespace and username)
-    let uuid = Uuid::new_v3(&Uuid::NAMESPACE_DNS, username.as_bytes());
+    // Use UUID v5 (SHA-1) for offline UUID generation, as v3 (MD5) is deprecated and not available in uuid 1.x
+    let uuid = Uuid::new_v5(&Uuid::NAMESPACE_DNS, username.as_bytes());
 
     let profile = MinecraftProfile {
         id: uuid,
@@ -32,7 +33,7 @@ pub async fn offline_login(username: &str) -> crate::Result<Credentials> {
 
     Ok(credentials)
 }
-//! Authentication flow interface
+/// Authentication flow interface
 
 use crate::State;
 use crate::state::{Credentials, MinecraftLoginFlow};

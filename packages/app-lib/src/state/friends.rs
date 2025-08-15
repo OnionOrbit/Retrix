@@ -76,7 +76,7 @@ impl FriendsSocket {
         if let Some(credentials) = credentials {
             let mut request = format!(
                 "{}_internal/launcher_socket?code={}",
-                env!("MODRINTH_SOCKET_URL"),
+                &std::env::var("MODRINTH_SOCKET_URL").unwrap_or_else(|_| "wss://socket.modrinth.com/".to_string()),
                 credentials.session
             )
             .into_client_request()?;
@@ -299,7 +299,7 @@ impl FriendsSocket {
     ) -> crate::Result<Vec<UserFriend>> {
         fetch_json(
             Method::GET,
-            concat!(env!("MODRINTH_API_URL_V3"), "friends"),
+            &format!("{}friends", std::env::var("MODRINTH_API_URL_V3").unwrap_or_else(|_| "https://api-v3.modrinth.com/".to_string())),
             None,
             None,
             semaphore,
@@ -324,7 +324,7 @@ impl FriendsSocket {
     ) -> crate::Result<()> {
         fetch_advanced(
             Method::POST,
-            &format!("{}friend/{user_id}", env!("MODRINTH_API_URL_V3")),
+            &format!("{}friend/{user_id}", std::env::var("MODRINTH_API_URL_V3").unwrap_or_else(|_| "https://api-v3.modrinth.com/".to_string())),
             None,
             None,
             None,
@@ -345,7 +345,7 @@ impl FriendsSocket {
     ) -> crate::Result<()> {
         fetch_advanced(
             Method::DELETE,
-            &format!("{}friend/{user_id}", env!("MODRINTH_API_URL_V3")),
+            &format!("{}friend/{user_id}", std::env::var("MODRINTH_API_URL_V3").unwrap_or_else(|_| "https://api-v3.modrinth.com/".to_string())),
             None,
             None,
             None,

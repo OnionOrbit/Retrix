@@ -20,7 +20,6 @@
   </div>
   <transition name="fade">
     <Card
-      v-if="showCard || mode === 'isolated'"
       ref="card"
       class="account-card"
       :class="{ expanded: mode === 'expanded', isolated: mode === 'isolated' }"
@@ -61,17 +60,55 @@
           <span style="font-size: 1.5em; font-weight: bold;">O</span>
         </Button>
       </div>
-      <ModalWrapper v-if="showOfflineModal" @close="showOfflineModal = false">
-        <template #default>
-          <div style="display: flex; flex-direction: column; gap: 1em; align-items: flex-start;">
-            <label for="offline-username">Offline Username</label>
-            <input id="offline-username" v-model="offlineUsername" placeholder="Enter username" style="padding: 0.5em; border-radius: 0.5em; border: 1px solid #ccc;" />
-            <Button color="primary" :disabled="!offlineUsername" @click="doOfflineLogin">Log in Offline</Button>
-          </div>
-        </template>
-      </ModalWrapper>
+      <div v-if="displayAccounts.length > 0" class="account-group">
+        <div v-for="account in displayAccounts" :key="account.profile.id" class="account-row">
+          <Button class="option account" @click="setAccount(account)">
+            <Avatar :src="getAccountAvatarUrl(account)" class="icon" />
+            <p>{{ account.profile.name }}</p>
+          </Button>
+          <Button v-tooltip="'Log out'" icon-only @click="logout(account.profile.id)">
+            <TrashIcon />
+          </Button>
+        </div>
+      </div>
+      <Button v-if="accounts.length > 0" @click="login()">
+        <PlusIcon />
+        Add account
+      </Button>
+    </Card>
+  </transition>
+  <ModalWrapper v-if="showOfflineModal" @close="showOfflineModal = false">
+    <template #default>
+      <div style="display: flex; flex-direction: column; gap: 1em; align-items: flex-start;">
+        <label for="offline-username">Offline Username</label>
+        <input id="offline-username" v-model="offlineUsername" placeholder="Enter username" style="padding: 0.5em; border-radius: 0.5em; border: 1px solid #ccc;" />
+        <Button color="primary" :disabled="!offlineUsername" @click="doOfflineLogin">Log in Offline</Button>
+      </div>
+    </template>
+  </ModalWrapper>
+</template>
+
+<script setup>
+import { trackEvent } from '@/helpers/analytics'
+import {
+    get_default_user,
+    login as login_flow,
+    offline_login,
+    remove_user,
+    set_default_user,
+    users,
+} from '@/helpers/auth'
 import ModalWrapper from './modal/ModalWrapper.vue'
-import { offline_login } from '@/helpers/auth'
+import { process_listener } from '@/helpers/events'
+import { getPlayerHeadUrl } from '@/helpers/rendering/batch-skin-renderer.ts'
+import { get_available_skins } from '@/helpers/skins'
+import { handleSevereError } from '@/store/error.js'
+import { DropdownIcon, LogInIcon, PlusIcon, SpinnerIcon, TrashIcon } from '@modrinth/assets'
+import { Avatar, Button, Card, injectNotificationManager } from '@modrinth/ui'
+import { computed, onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue'
+
+const { handleError } = injectNotificationManager()
+
 const showOfflineModal = ref(false)
 const offlineUsername = ref("")
 
@@ -92,43 +129,6 @@ async function doOfflineLogin() {
   }
   loginDisabled.value = false
 }
-      <div v-if="displayAccounts.length > 0" class="account-group">
-        <div v-for="account in displayAccounts" :key="account.profile.id" class="account-row">
-          <Button class="option account" @click="setAccount(account)">
-            <Avatar :src="getAccountAvatarUrl(account)" class="icon" />
-            <p>{{ account.profile.name }}</p>
-          </Button>
-          <Button v-tooltip="'Log out'" icon-only @click="logout(account.profile.id)">
-            <TrashIcon />
-          </Button>
-        </div>
-      </div>
-      <Button v-if="accounts.length > 0" @click="login()">
-        <PlusIcon />
-        Add account
-      </Button>
-    </Card>
-  </transition>
-</template>
-
-<script setup>
-import { trackEvent } from '@/helpers/analytics'
-import {
-    get_default_user,
-    login as login_flow,
-    remove_user,
-    set_default_user,
-    users,
-} from '@/helpers/auth'
-import { process_listener } from '@/helpers/events'
-import { getPlayerHeadUrl } from '@/helpers/rendering/batch-skin-renderer.ts'
-import { get_available_skins } from '@/helpers/skins'
-import { handleSevereError } from '@/store/error.js'
-import { DropdownIcon, LogInIcon, PlusIcon, SpinnerIcon, TrashIcon } from '@modrinth/assets'
-import { Avatar, Button, Card, injectNotificationManager } from '@modrinth/ui'
-import { computed, onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue'
-
-const { handleError } = injectNotificationManager()
 
 defineProps({
   mode: {
