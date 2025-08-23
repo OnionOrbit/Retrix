@@ -1,39 +1,56 @@
-# ![Modrinth Monorepo Cover](/.github/assets/monorepo_cover.png)
 
-![Issues](https://img.shields.io/github/issues-raw/Modrinth/code?color=c78aff&label=issues&style=for-the-badge)
-![Pull Requests](https://img.shields.io/github/issues-pr-raw/Modrinth/code?color=c78aff&label=PRs&style=for-the-badge)
-![Contributors](https://img.shields.io/github/contributors/Modrinth/code?color=c78aff&label=contributors&style=for-the-badge)
-![Lines](https://img.shields.io/endpoint?url=https://ghloc.vercel.app/api/modrinth/code/badge?style=flat&logoColor=white&color=c78aff&style=for-the-badge)
-![Commit Activity](https://img.shields.io/github/commit-activity/m/Modrinth/code?color=c78aff&label=commits&style=for-the-badge)
-![Last Commit](https://img.shields.io/github/last-commit/Modrinth/code?color=c78aff&label=last%20commit&style=for-the-badge)
+# Retrix Launcher
 
-## Modrinth Monorepo
+![Issues](https://img.shields.io/github/issues-raw/OnionOrbit/Retrix?color=5865F2&label=issues&style=for-the-badge)
+![Forks](https://img.shields.io/github/forks/OnionOrbit/Retrix?color=5865F2&style=for-the-badge)
+![Stars](https://img.shields.io/github/stars/OnionOrbit/Retrix?color=5865F2&style=for-the-badge)
+![Last Commit](https://img.shields.io/github/last-commit/OnionOrbit/Retrix?color=5865F2&label=last%20commit&style=for-the-badge)
 
-Welcome to the Modrinth Monorepo, the primary codebase for the Modrinth web interface and app. It contains ![Lines](https://img.shields.io/endpoint?url=https://ghloc.vercel.app/api/modrinth/olympus/badge?logoColor=white&color=black&label=) lines of code and has ![Contributors](https://img.shields.io/github/contributors/Modrinth/code?color=black&label=) contributors!
+Retrix is an independent community fork of the Modrinth Monorepo, focused on a simpler feature set and offline account support.
 
-If you're not a developer and you've stumbled upon this repository, you can access the web interface on the [Modrinth website](https://modrinth.com) and download the latest release of the app [here](https://modrinth.com/app).
+Important: Retrix is not affiliated with, endorsed by, or sponsored by Modrinth or Modrinth LLC. It is an unofficial fork intended for personal and community use.
+
+-   Upstream project:  [https://github.com/Modrinth/code](https://github.com/Modrinth/code)
+-   Retrix fork:  [https://github.com/OnionOrbit/Retrix](https://github.com/OnionOrbit/Retrix)
+
+
+### What’s different from upstream
+-   Added: Offline account feature.
+-   Removed: Skins and Friends features.
+-   Changed: Default theme color to blue.
+-   Branding status: Some Modrinth branding may still exist from the upstream UI; this is planned to be replaced. Retrix is not an official Modrinth product.
+
+
+## Legal, licenses, and attribution
+
+-   Licenses: This repository retains the upstream per-package licenses. Each package is licensed under its respective license; see the LICENSE file in each package directory for details.
+-   Modifications: Unless otherwise stated in a package’s LICENSE file, changes in this fork are offered under the same license as the corresponding upstream package to which they apply. Copyleft obligations (if any) are preserved. Source code is provided in this repository to satisfy those obligations.
+-   Attribution: Credit to Modrinth and all upstream contributors for their original work. This fork would not be possible without the upstream project.
+-   Redistribution: If you distribute binaries or source derived from this fork, you must retain copyright notices and include the applicable license texts as required by the original licenses.
+
+## Trademarks and affiliation
+
+-   “Modrinth” and any related marks are the property of their respective owners. Retrix is not affiliated with, endorsed by, or sponsored by Modrinth or Modrinth LLC.
+-   “Minecraft” is a trademark of Mojang AB and Microsoft. Retrix is not affiliated with, endorsed by, or sponsored by Mojang or Microsoft.
+-   Any remaining upstream branding in this fork is incidental and will be replaced in future updates.
+
+## Privacy
+
+Retrix itself does not aim to collect personal data beyond what is necessary for the features it provides. Review the source code to understand what data is stored locally and what network requests are performed. Use of third-party services (e.g., Microsoft, Mojang, Modrinth APIs) is subject to their respective privacy policies and terms.
 
 ## Development
 
-This repository contains two primary packages. For detailed development information, please refer to their respective READMEs:
+The development process is similar to the original project. For detailed information, please refer to the READMEs in their respective packages:
 
-- [Web Interface](apps/frontend/README.md)
-- [Desktop App](apps/app/README.md)
+* [Web Interface](apps/frontend/README.md)
+* [Desktop App](apps/app/README.md)
 
-## Contributing
-
-We welcome contributions! Before submitting any contributions, please read our [contributing guidelines](https://docs.modrinth.com/contributing/getting-started/).
-
-If you plan to fork this repository for your own purposes, please review our [copying guidelines](COPYING.md).
-
-## Security
-
-If you discover a security vulnerability within our codebase, please follow our [responsible disclosure guidelines](https://modrinth.com/legal/security).
 
 ## Support
 
-If you need help with the Modrinth web interface or app, please visit our [support page](https://support.modrinth.com). For general inquiries, you can also join our [Discord server](https://discord.modrinth.com).
+-   Issues and feature requests:  [https://github.com/OnionOrbit/Retrix/issues](https://github.com/OnionOrbit/Retrix/issues)
+- **Do not** seek support from official Modrinth channels (like their Discord or support page), as they do not support this fork.
 
-## License
+## Acknowledgements
 
-All packages in this repository are licensed under their respective licenses. Refer to the LICENSE file in each package for more information.
+Thanks to the Modrinth team and contributors for their work on the upstream project. Retrix exists thanks to that foundation.
