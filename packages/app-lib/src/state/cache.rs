@@ -1301,29 +1301,25 @@ impl CachedEntry {
                     }
                 });
 
-                let url = format!(
-                    "{}version_files/update",
-                    std::env::var("MODRINTH_API_URL").unwrap_or_else(|_| {
-                        "https://api.modrinth.com/".to_string()
-                    })
-                );
-
-                let variations = futures::future::try_join_all(filtered_keys.iter().map(|((loaders_key, game_version), hashes)| {
-                    fetch_json::<HashMap<String, Version>>(
-                        Method::POST,
-                        &url,
-                        None,
-                        Some(serde_json::json!({
-                            "algorithm": "sha1",
-                            "hashes": hashes,
-                            "loaders": loaders_key.split('+').collect::<Vec<_>>(),
-                            "game_versions": [game_version]
-                        })),
-                        fetch_semaphore,
-                        pool,
-                    )
-                }))
-                .await?;
+                let variations =
+                    futures::future::try_join_all(filtered_keys.iter().map(
+                        |((loaders_key, game_version), hashes)| {
+                            fetch_json::<HashMap<String, Version>>(
+                                Method::POST,
+                                concat!(env!("MODRINTH_API_URL"), "version_files/update"),
+                                None,
+                                Some(serde_json::json!({
+                                    "algorithm": "sha1",
+                                    "hashes": hashes,
+                                    "loaders": loaders_key.split('+').collect::<Vec<_>>(),
+                                    "game_versions": [game_version]
+                                })),
+                                fetch_semaphore,
+                                pool,
+                            )
+                        },
+                    ))
+                    .await?;
 
                 for (index, mut variation) in variations.into_iter().enumerate()
                 {
@@ -1376,10 +1372,7 @@ impl CachedEntry {
                             x.key().to_string(),
                             format!(
                                 "{}search{}",
-                                std::env::var("MODRINTH_API_URL")
-                                    .unwrap_or_else(|_| {
-                                        "https://api.modrinth.com/v2/".to_string()
-                                    }),
+                                env!("MODRINTH_API_URL"),
                                 x.key()
                             ),
                         )

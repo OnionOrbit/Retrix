@@ -20,13 +20,13 @@ export { default as EnvironmentIndicator } from './base/EnvironmentIndicator.vue
 export { default as ErrorInformationCard } from './base/ErrorInformationCard.vue'
 export { default as FileInput } from './base/FileInput.vue'
 export { default as FilterBar } from './base/FilterBar.vue'
-export type { FilterBarOption } from './base/FilterBar.vue'
+// export type { FilterBarOption } from './base/FilterBar.vue' // Removed: no such export
 export { default as HeadingLink } from './base/HeadingLink.vue'
 export { default as LoadingIndicator } from './base/LoadingIndicator.vue'
 export { default as ManySelect } from './base/ManySelect.vue'
 export { default as MarkdownEditor } from './base/MarkdownEditor.vue'
 export { default as OverflowMenu } from './base/OverflowMenu.vue'
-export type { Option as OverflowMenuOption } from './base/OverflowMenu.vue'
+// export type { Option as OverflowMenuOption } from './base/OverflowMenu.vue' // Removed: no such export
 export { default as Page } from './base/Page.vue'
 export { default as Pagination } from './base/Pagination.vue'
 export { default as PopoutMenu } from './base/PopoutMenu.vue'
@@ -57,18 +57,13 @@ export { default as ChangelogEntry } from './changelog/ChangelogEntry.vue'
 export { default as Chart } from './chart/Chart.vue'
 export { default as CompactChart } from './chart/CompactChart.vue'
 
-// Content
-export { default as ContentListPanel } from './content/ContentListPanel.vue'
-export { default as NewsArticleCard } from './content/NewsArticleCard.vue'
-export type { Article as NewsArticle } from './content/NewsArticleCard.vue'
-
 // Modals
 export { default as ConfirmModal } from './modal/ConfirmModal.vue'
 export { default as Modal } from './modal/Modal.vue'
 export { default as NewModal } from './modal/NewModal.vue'
 export { default as ShareModal } from './modal/ShareModal.vue'
 export { default as TabbedModal } from './modal/TabbedModal.vue'
-export type { Tab as TabbedModalTab } from './modal/TabbedModal.vue'
+
 
 // Navigation
 export { default as Breadcrumbs } from './nav/Breadcrumbs.vue'
@@ -104,12 +99,7 @@ export { default as AddPaymentMethodModal } from './billing/AddPaymentMethodModa
 export { default as ModrinthServersPurchaseModal } from './billing/ModrinthServersPurchaseModal.vue'
 export { default as PurchaseModal } from './billing/PurchaseModal.vue'
 
-// Skins
-export { default as CapeButton } from './skin/CapeButton.vue'
-export { default as CapeLikeTextButton } from './skin/CapeLikeTextButton.vue'
-export { default as SkinButton } from './skin/SkinButton.vue'
-export { default as SkinLikeTextButton } from './skin/SkinLikeTextButton.vue'
-export { default as SkinPreviewRenderer } from './skin/SkinPreviewRenderer.vue'
+
 
 // Version
 export { default as VersionChannelIndicator } from './version/VersionChannelIndicator.vue'
@@ -123,3 +113,10 @@ export { default as ThemeSelector } from './settings/ThemeSelector.vue'
 export { default as ServersSpecs } from './billing/ServersSpecs.vue'
 export { default as BackupWarning } from './servers/backups/BackupWarning.vue'
 export { default as ServersPromo } from './servers/ServersPromo.vue'
+
+// Content
+export { default as ContentListPanel } from './content/ContentListPanel.vue'
+export type { ContentItem } from './content/ContentListItem.vue'
+
+// Skins feature removed in Retrix fork.
+

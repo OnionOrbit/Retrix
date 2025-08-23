@@ -45,18 +45,9 @@ pub(crate) async fn connect() -> crate::Result<Pool<Sqlite>> {
 /// kept around for a little while to allow users to recover from accidental
 /// deletions.
 async fn stale_data_cleanup(pool: &Pool<Sqlite>) -> crate::Result<()> {
-    let mut tx = pool.begin().await?;
+    let tx = pool.begin().await?;
 
-    sqlx::query!(
-        "DELETE FROM default_minecraft_capes WHERE minecraft_user_uuid NOT IN (SELECT uuid FROM minecraft_users)"
-    )
-    .execute(&mut *tx)
-    .await?;
-    sqlx::query!(
-        "DELETE FROM custom_minecraft_skins WHERE minecraft_user_uuid NOT IN (SELECT uuid FROM minecraft_users)"
-    )
-    .execute(&mut *tx)
-    .await?;
+    // Skins feature removed: cleanup queries no longer applicable
 
     tx.commit().await?;
 

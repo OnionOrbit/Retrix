@@ -1,161 +1,126 @@
 <template>
-  <div
-    v-if="mode !== 'isolated'"
-    ref="button"
-    class="button-base mt-2 px-3 py-2 bg-button-bg rounded-xl flex items-center gap-2"
-    :class="{ expanded: mode === 'expanded' }"
-    @click="toggleMenu"
-  >
-    <Avatar
-      size="36px"
-      :src="
-        selectedAccount ? avatarUrl : 'https://launcher-files.modrinth.com/assets/steve_head.png'
-      "
-    />
-    <div class="flex flex-col w-full">
-      <span>{{ selectedAccount ? selectedAccount.profile.name : 'Select account' }}</span>
-      <span class="text-secondary text-xs">Minecraft account</span>
-    </div>
-    <DropdownIcon class="w-5 h-5 shrink-0" />
-  </div>
-  <transition name="fade">
-    <Card
-      ref="card"
-      class="account-card"
-      :class="{ expanded: mode === 'expanded', isolated: mode === 'isolated' }"
-    >
-      <div v-if="selectedAccount" class="selected account">
-        <Avatar size="xs" :src="avatarUrl" />
-        <div>
-          <h4>{{ selectedAccount.profile.name }}</h4>
-          <p>Selected</p>
-        </div>
-        <Button
-          v-tooltip="'Log out'"
-          icon-only
-          color="raised"
-          @click="logout(selectedAccount.profile.id)"
-        >
-          <TrashIcon />
-        </Button>
-      </div>
-      <div v-else class="logged-out account">
-        <h4>Not signed in</h4>
-        <Button
-          v-tooltip="'Log in with Microsoft'"
-          :disabled="loginDisabled"
-          icon-only
-          color="primary"
-          @click="login()"
-        >
-          <LogInIcon v-if="!loginDisabled" />
-          <SpinnerIcon v-else class="animate-spin" />
-        </Button>
-        <Button
-          v-tooltip="'Log in with Offline/Cracked account'"
-          icon-only
-          color="secondary"
-          @click="showOfflineModal = true; showCard = false"
-        >
-          <span style="font-size: 1.5em; font-weight: bold;">O</span>
-        </Button>
-      </div>
-      <div v-if="displayAccounts.length > 0" class="account-group">
-        <div v-for="account in displayAccounts" :key="account.profile.id" class="account-row">
-          <Button class="option account" @click="setAccount(account)">
-            <Avatar :src="getAccountAvatarUrl(account)" class="icon" />
-            <p>{{ account.profile.name }}</p>
-          </Button>
-          <Button v-tooltip="'Log out'" icon-only @click="logout(account.profile.id)">
-            <TrashIcon />
-          </Button>
-        </div>
-      </div>
-      <Button v-if="accounts.length > 0" @click="login()">
-        <PlusIcon />
-        Add account
-      </Button>
-    </Card>
-  </transition>
-  <ModalWrapper
-    v-if="showOfflineModal"
-    @close="showOfflineModal = false"
-    style="z-index: 100;"
-  >
-    <template #default>
-      <div style="display: flex; flex-direction: column; gap: 1em; align-items: flex-start;">
-        <label for="offline-username">Offline Username</label>
-        <input
-          id="offline-username"
-          ref="offlineInput"
-          v-model="offlineUsername"
-          placeholder="Enter username"
-          style="padding: 0.5em; border-radius: 0.5em; border: 1px solid #ccc;"
-        />
-        <Button color="primary" :disabled="!offlineUsername" @click="doOfflineLogin">Log in Offline</Button>
-      </div>
-    </template>
-  </ModalWrapper>
+	<div
+		v-if="mode !== 'isolated'"
+		ref="button"
+		class="button-base mt-2 px-3 py-2 bg-button-bg rounded-xl flex items-center gap-2"
+		:class="{ expanded: mode === 'expanded' }"
+		@click="toggleMenu"
+	>
+		<Avatar
+			size="36px"
+			:src="
+				selectedAccount ? avatarUrl : 'https://launcher-files.modrinth.com/assets/steve_head.png'
+			"
+		/>
+		<div class="flex flex-col w-full">
+			<span>{{ selectedAccount ? selectedAccount.profile.name : 'Select account' }}</span>
+			<span class="text-secondary text-xs">Minecraft account</span>
+			<span v-if="selectedAccount && selectedAccount.offline" class="text-xs text-blue-600 font-bold">Offline Account</span>
+		</div>
+		<DropdownIcon class="w-5 h-5 shrink-0" />
+	</div>
+	<transition name="fade">
+		<Card
+			v-if="showCard || mode === 'isolated'"
+			ref="card"
+			class="account-card"
+			:class="{ expanded: mode === 'expanded', isolated: mode === 'isolated' }"
+		>
+			<div v-if="selectedAccount" class="selected account">
+				<Avatar size="xs" :src="avatarUrl" />
+				<div>
+					<h4>{{ selectedAccount.profile.name }}</h4>
+					<p>Selected</p>
+				</div>
+				<Button
+					v-tooltip="'Log out'"
+					icon-only
+					color="raised"
+					@click="logout(selectedAccount.profile.id)"
+				>
+					<TrashIcon />
+				</Button>
+			</div>
+				<div v-else class="logged-out account">
+					<h4>Not signed in</h4>
+					<Button
+						v-tooltip="'Log in'"
+						:disabled="loginDisabled"
+						icon-only
+						color="primary"
+						@click="login()"
+					>
+						<LogInIcon v-if="!loginDisabled" />
+						<SpinnerIcon v-else class="animate-spin" />
+					</Button>
+					<Button
+						v-tooltip="'Add Offline Account'"
+						color="secondary"
+						icon-only
+						@click="addOfflineAccount"
+					>
+						<PlusIcon />
+					</Button>
+				</div>
+			<div v-if="displayAccounts.length > 0" class="account-group">
+				<div v-for="account in displayAccounts" :key="account.profile.id" class="account-row">
+					<Button class="option account" @click="setAccount(account)">
+						<Avatar :src="getAccountAvatarUrl(account)" class="icon" />
+						<p>{{ account.profile.name }}</p>
+					</Button>
+					<Button v-tooltip="'Log out'" icon-only @click="logout(account.profile.id)">
+						<TrashIcon />
+					</Button>
+				</div>
+			</div>
+			<Button v-if="accounts.length > 0" @click="login()">
+				<PlusIcon />
+				Add account
+			</Button>
+		</Card>
+	</transition>
 </template>
 
+
 <script setup>
-import { trackEvent } from '@/helpers/analytics'
-import {
-    get_default_user,
-    login as login_flow,
-    offline_login,
-    remove_user,
-    set_default_user,
-    users,
-} from '@/helpers/auth'
-import ModalWrapper from './modal/ModalWrapper.vue'
-import { process_listener } from '@/helpers/events'
-import { getPlayerHeadUrl } from '@/helpers/rendering/batch-skin-renderer.ts'
-import { get_available_skins } from '@/helpers/skins'
-import { handleSevereError } from '@/store/error.js'
 import { DropdownIcon, LogInIcon, PlusIcon, SpinnerIcon, TrashIcon } from '@modrinth/assets'
 import { Avatar, Button, Card, injectNotificationManager } from '@modrinth/ui'
 import { computed, onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue'
 
-const { handleError } = injectNotificationManager()
-
-const showOfflineModal = ref(false)
-const offlineUsername = ref("")
-const offlineInput = ref(null)
-
-watch(showOfflineModal, (newVal) => {
-  if (newVal) {
-    // Focus input after modal is rendered
-    setTimeout(() => {
-      if (offlineInput.value) offlineInput.value.focus()
-    }, 100)
-  }
-})
-
-async function doOfflineLogin() {
-  if (!offlineUsername.value) return
-  loginDisabled.value = true
-  try {
-    const loggedIn = await offline_login(offlineUsername.value)
-    if (loggedIn) {
-      await setAccount(loggedIn)
-      await refreshValues()
-      showOfflineModal.value = false
-      offlineUsername.value = ""
-    }
-    trackEvent('AccountLogIn', { method: 'offline' })
-  } catch (e) {
-    handleSevereError(e)
-  }
-  loginDisabled.value = false
+import { trackEvent } from '@/helpers/analytics'
+import {
+	get_default_user,
+	login as login_flow,
+	remove_user,
+	set_default_user,
+	users,
+	add_offline_account,
+	remove_offline_account,
+} from '@/helpers/auth'
+import { process_listener } from '@/helpers/events'
+import { handleSevereError } from '@/store/error'
+// Add Offline Account logic
+async function addOfflineAccount() {
+	let username = prompt('Enter a username for offline account:')
+	if (!username) return
+	try {
+		const account = add_offline_account(username)
+		await refreshValues()
+		await setAccount(account)
+		trackEvent('OfflineAccountAdd')
+	} catch (e) {
+		handleError(e)
+	}
 }
 
+const { handleError } = injectNotificationManager()
+
 defineProps({
-  mode: {
-    type: String,
-    required: true,
-    default: 'normal',
-  },
+	mode: {
+		type: String,
+		required: true,
+		default: 'normal',
+	},
 })
 
 const emit = defineEmits(['change'])
@@ -165,365 +130,341 @@ const loginDisabled = ref(false)
 const defaultUser = ref()
 
 async function refreshValues() {
-  defaultUser.value = await get_default_user().catch(handleError)
-  accounts.value = await users().catch(handleError)
+	defaultUser.value = await get_default_user().catch(handleError)
+	accounts.value = await users().catch(handleError)
 
-}
+	}
 
 function setLoginDisabled(value) {
-  loginDisabled.value = value
+	loginDisabled.value = value
 }
 
 defineExpose({
-  refreshValues,
-  setLoginDisabled,
-  loginDisabled,
+	refreshValues,
+	setLoginDisabled,
+	loginDisabled,
 })
 await refreshValues()
 
 const displayAccounts = computed(() =>
-  accounts.value.filter((account) => defaultUser.value !== account.profile.id),
+	accounts.value.filter((account) => defaultUser.value !== account.profile.id),
 )
 
 const avatarUrl = computed(() => {
-  if (selectedAccount.value?.profile?.id) {
-    return `https://mc-heads.net/avatar/${selectedAccount.value.profile.id}/128`
-  }
-  return 'https://launcher-files.modrinth.com/assets/steve_head.png'
+	if (selectedAccount.value?.profile?.id) {
+		return `https://mc-heads.net/avatar/${selectedAccount.value.profile.id}/128`
+	}
+	return 'https://launcher-files.modrinth.com/assets/steve_head.png'
 })
 
 function getAccountAvatarUrl(account) {
-  return `https://mc-heads.net/avatar/${account.profile.id}/128`
+	return `https://mc-heads.net/avatar/${account.profile.id}/128`
 }
 
 const selectedAccount = computed(() =>
-  accounts.value.find((account) => account.profile.id === defaultUser.value),
+	accounts.value.find((account) => account.profile.id === defaultUser.value),
 )
 
 async function setAccount(account) {
-  defaultUser.value = account.profile.id
-  await set_default_user(account.profile.id).catch(handleError)
-  emit('change')
+	defaultUser.value = account.profile.id
+	await set_default_user(account.profile.id).catch(handleError)
+	emit('change')
 }
 
 async function login() {
-  loginDisabled.value = true
-  const loggedIn = await login_flow().catch(handleSevereError)
+	loginDisabled.value = true
+	const loggedIn = await login_flow().catch(handleSevereError)
 
-  if (loggedIn) {
-    await setAccount(loggedIn)
-    await refreshValues()
-  }
+	if (loggedIn) {
+		await setAccount(loggedIn)
+		await refreshValues()
+	}
 
-  trackEvent('AccountLogIn')
-  loginDisabled.value = false
+	trackEvent('AccountLogIn')
+	loginDisabled.value = false
 }
 
 const logout = async (id) => {
-  await remove_user(id).catch(handleError)
-  await refreshValues()
-  if (!selectedAccount.value && accounts.value.length > 0) {
-    await setAccount(accounts.value[0])
-    await refreshValues()
-  } else {
-    emit('change')
-  }
-  trackEvent('AccountLogOut')
+	// Remove both online and offline accounts
+	await remove_user(id).catch(() => {})
+	remove_offline_account(id)
+	await refreshValues()
+	if (!selectedAccount.value && accounts.value.length > 0) {
+		await setAccount(accounts.value[0])
+		await refreshValues()
+	} else {
+		emit('change')
+	}
+	trackEvent('AccountLogOut')
 }
 
 const showCard = ref(false)
 const card = ref(null)
 const button = ref(null)
 const handleClickOutside = (event) => {
-  const elements = document.elementsFromPoint(event.clientX, event.clientY)
-  if (
-    card.value &&
-    card.value.$el !== event.target &&
-    !elements.includes(card.value.$el) &&
-    !button.value.contains(event.target) &&
-    !showOfflineModal.value
-  ) {
-    toggleMenu(false)
-  }
+	const elements = document.elementsFromPoint(event.clientX, event.clientY)
+	if (
+		card.value &&
+		card.value.$el !== event.target &&
+		!elements.includes(card.value.$el) &&
+		!button.value.contains(event.target)
+	) {
+		toggleMenu(false)
+	}
 }
 
 function toggleMenu(override = true) {
-  // Only open if we're not already open and override is true
-  if (!showCard.value && override) {
-    showCard.value = true
-  } else {
-    showCard.value = false
-  }
+	if (showCard.value || !override) {
+		showCard.value = false
+	} else {
+		showCard.value = true
+	}
 }
 
 const unlisten = await process_listener(async (e) => {
-  if (e.event === 'launched') {
-    await refreshValues()
-  }
+	if (e.event === 'launched') {
+		await refreshValues()
+	}
 })
 
 onMounted(() => {
-  window.addEventListener('click', handleClickOutside)
+	window.addEventListener('click', handleClickOutside)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('click', handleClickOutside)
+	window.removeEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
-  unlisten()
+	unlisten()
 })
-
-async function playInstance(instanceId) {
-  const activeAccount = selectedAccount.value;
-
-  if (!activeAccount) {
-    handleError(new Error('No active account found. Please log in.'));
-    return;
-  }
-
-  if (activeAccount.profile.id === 'offline') {
-    console.info('Playing in offline mode.');
-    // Add logic to handle offline play
-  } else {
-    console.info('Playing with Microsoft account.');
-    // Add logic to handle Microsoft account play
-  }
-
-  // Proceed with launching the instance
-  try {
-    await launchInstance(instanceId, activeAccount);
-  } catch (error) {
-    handleError(error);
-  }
-}
 </script>
 
 <style scoped lang="scss">
 .selected {
-  background: var(--color-brand-highlight);
-  border-radius: var(--radius-lg);
-  color: var(--color-contrast);
-  gap: 1rem;
+	background: var(--color-brand-highlight);
+	border-radius: var(--radius-lg);
+	color: var(--color-contrast);
+	gap: 1rem;
 }
 
 .logged-out {
-  background: var(--color-bg);
-  border-radius: var(--radius-lg);
-  gap: 1rem;
+	background: var(--color-bg);
+	border-radius: var(--radius-lg);
+	gap: 1rem;
 }
 
 .account {
-  width: max-content;
-  display: flex;
-  align-items: center;
-  text-align: left;
-  padding: 0.5rem 1rem;
+	width: max-content;
+	display: flex;
+	align-items: center;
+	text-align: left;
+	padding: 0.5rem 1rem;
 
-  h4,
-  p {
-    margin: 0;
-  }
+	h4,
+	p {
+		margin: 0;
+	}
 }
 
 .account-card {
-  position: fixed;
-  display: flex;
-  flex-direction: column;
-  margin-top: 0.5rem;
-  right: 2rem;
-  z-index: 11;
-  gap: 0.5rem;
-  padding: 1rem;
-  border: 1px solid var(--color-button-bg);
-  width: max-content;
-  user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  max-height: 98vh;
-  overflow-y: auto;
+	position: fixed;
+	display: flex;
+	flex-direction: column;
+	margin-top: 0.5rem;
+	right: 2rem;
+	z-index: 11;
+	gap: 0.5rem;
+	padding: 1rem;
+	border: 1px solid var(--color-button-bg);
+	width: max-content;
+	user-select: none;
+	-ms-user-select: none;
+	-webkit-user-select: none;
+	max-height: 98vh;
+	overflow-y: auto;
 
-  &::-webkit-scrollbar-track {
-    border-top-right-radius: 1rem;
-    border-bottom-right-radius: 1rem;
-  }
+	&::-webkit-scrollbar-track {
+		border-top-right-radius: 1rem;
+		border-bottom-right-radius: 1rem;
+	}
 
-  &::-webkit-scrollbar {
-    border-top-right-radius: 1rem;
-    border-bottom-right-radius: 1rem;
-  }
+	&::-webkit-scrollbar {
+		border-top-right-radius: 1rem;
+		border-bottom-right-radius: 1rem;
+	}
 
-  &.hidden {
-    display: none;
-  }
+	&.hidden {
+		display: none;
+	}
 
-  &.expanded {
-    left: 13.5rem;
-  }
+	&.expanded {
+		left: 13.5rem;
+	}
 
-  &.isolated {
-    position: relative;
-    left: 0;
-    top: 0;
-  }
+	&.isolated {
+		position: relative;
+		left: 0;
+		top: 0;
+	}
 }
 
 .accounts-title {
-  font-size: 1.2rem;
-  font-weight: bolder;
+	font-size: 1.2rem;
+	font-weight: bolder;
 }
 
 .account-group {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
 }
 
 .option {
-  width: calc(100% - 2.25rem);
-  background: var(--color-raised-bg);
-  color: var(--color-base);
-  box-shadow: none;
+	width: calc(100% - 2.25rem);
+	background: var(--color-raised-bg);
+	color: var(--color-base);
+	box-shadow: none;
 
-  img {
-    margin-right: 0.5rem;
-  }
+	img {
+		margin-right: 0.5rem;
+	}
 }
 
 .icon {
-  --size: 1.5rem !important;
+	--size: 1.5rem !important;
 }
 
 .account-row {
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  vertical-align: center;
-  justify-content: space-between;
-  padding-right: 1rem;
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+	vertical-align: center;
+	justify-content: space-between;
+	padding-right: 1rem;
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition:
-    opacity 0.25s ease,
-    translate 0.25s ease,
-    scale 0.25s ease;
+	transition:
+		opacity 0.25s ease,
+		translate 0.25s ease,
+		scale 0.25s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
-  opacity: 0;
-  translate: 0 -2rem;
-  scale: 0.9;
+	opacity: 0;
+	translate: 0 -2rem;
+	scale: 0.9;
 }
 
 .avatar-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--color-base);
-  background-color: var(--color-button-bg);
-  border-radius: var(--radius-md);
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  text-align: left;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--color-base);
+	background-color: var(--color-button-bg);
+	border-radius: var(--radius-md);
+	width: 100%;
+	padding: 0.5rem 0.75rem;
+	text-align: left;
 
-  &.expanded {
-    border: 1px solid var(--color-button-bg);
-    padding: 1rem;
-  }
+	&.expanded {
+		border: 1px solid var(--color-button-bg);
+		padding: 1rem;
+	}
 }
 
 .avatar-text {
-  margin: auto 0 auto 0.25rem;
-  display: flex;
-  flex-direction: column;
+	margin: auto 0 auto 0.25rem;
+	display: flex;
+	flex-direction: column;
 }
 
 .text {
-  width: 6rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+	width: 6rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .accounts-text {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	margin: 0;
 }
 
 .qr-code {
-  background-color: white !important;
-  border-radius: var(--radius-md);
+	background-color: white !important;
+	border-radius: var(--radius-md);
 }
 
 .modal-body {
-  display: flex;
-  flex-direction: row;
-  gap: var(--gap-lg);
-  align-items: center;
-  padding: var(--gap-xl);
+	display: flex;
+	flex-direction: row;
+	gap: var(--gap-lg);
+	align-items: center;
+	padding: var(--gap-xl);
 
-  .modal-text {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-sm);
-    width: 100%;
+	.modal-text {
+		display: flex;
+		flex-direction: column;
+		gap: var(--gap-sm);
+		width: 100%;
 
-    h2,
-    p {
-      margin: 0;
-    }
+		h2,
+		p {
+			margin: 0;
+		}
 
-    .code-text {
-      display: flex;
-      flex-direction: row;
-      gap: var(--gap-xs);
-      align-items: center;
+		.code-text {
+			display: flex;
+			flex-direction: row;
+			gap: var(--gap-xs);
+			align-items: center;
 
-      .code {
-        background-color: var(--color-bg);
-        border-radius: var(--radius-md);
-        border: solid 1px var(--color-button-bg);
-        font-family: var(--mono-font);
-        letter-spacing: var(--gap-md);
-        color: var(--color-contrast);
-        font-size: 2rem;
-        font-weight: bold;
-        padding: var(--gap-sm) 0 var(--gap-sm) var(--gap-md);
-      }
+			.code {
+				background-color: var(--color-bg);
+				border-radius: var(--radius-md);
+				border: solid 1px var(--color-button-bg);
+				font-family: var(--mono-font);
+				letter-spacing: var(--gap-md);
+				color: var(--color-contrast);
+				font-size: 2rem;
+				font-weight: bold;
+				padding: var(--gap-sm) 0 var(--gap-sm) var(--gap-md);
+			}
 
-      .btn {
-        width: 2.5rem;
-        height: 2.5rem;
-      }
-    }
-  }
+			.btn {
+				width: 2.5rem;
+				height: 2.5rem;
+			}
+		}
+	}
 }
 
 .button-row {
-  display: flex;
-  flex-direction: row;
+	display: flex;
+	flex-direction: row;
 }
 
 .modal {
-  position: absolute;
+	position: absolute;
 }
 
 .code {
-  color: var(--color-brand);
-  padding: 0.05rem 0.1rem;
-  // row not column
-  display: flex;
+	color: var(--color-brand);
+	padding: 0.05rem 0.1rem;
+	// row not column
+	display: flex;
 
-  .card {
-    background: var(--color-base);
-    color: var(--color-contrast);
-    padding: 0.5rem 1rem;
-  }
+	.card {
+		background: var(--color-base);
+		color: var(--color-contrast);
+		padding: 0.5rem 1rem;
+	}
 }
 </style>

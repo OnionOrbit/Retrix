@@ -1,9 +1,7 @@
 use crate::api::Result;
 
 use std::path::Path;
-use theseus::minecraft_skins::{
-    self, Bytes, Cape, MinecraftSkinVariant, Skin, UrlOrBlob,
-};
+// Skins feature removed
 
 pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
     tauri::plugin::Builder::new("minecraft-skins")

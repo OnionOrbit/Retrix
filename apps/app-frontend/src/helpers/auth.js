@@ -1,17 +1,80 @@
 /**
- * Offline login: create credentials for a username (cracked/offline mode)
- * @param {string} username
- * @returns {Promise<Credential>}
- */
-export async function offline_login(username) {
-  return await invoke('plugin:auth|offline_login', { username })
-}
-/**
  * All theseus API calls return serialized values (both return values and errors);
  * So, for example, addDefaultInstance creates a blank Profile object, where the Rust struct is serialized,
  *  and deserialized into a usable JS object.
  */
 import { invoke } from '@tauri-apps/api/core'
+
+// Offline accounts are stored in localStorage under 'offline_accounts'.
+function getOfflineAccounts() {
+	try {
+		return JSON.parse(localStorage.getItem('offline_accounts') || '[]')
+	} catch {
+		return []
+	}
+}
+
+function saveOfflineAccounts(accounts) {
+	localStorage.setItem('offline_accounts', JSON.stringify(accounts))
+}
+
+function getDefaultOfflineUser() {
+	try {
+		return localStorage.getItem('default_offline_user') || null
+	} catch {
+		return null
+	}
+}
+function setDefaultOfflineUser(id) {
+	try {
+		if (id) localStorage.setItem('default_offline_user', id)
+	} catch {}
+}
+function clearDefaultOfflineUser() {
+	try {
+		localStorage.removeItem('default_offline_user')
+	} catch {}
+}
+
+/**
+ * Add an offline account (username, optional uuid)
+ * @param {string} username
+ * @param {string} [uuid]
+ * @returns {object} The created offline account object
+ */
+export function add_offline_account(username, uuid) {
+	if (!username) throw new Error('Username required')
+	const id = uuid || 'offline-' + username + '-' + Math.random().toString(36).slice(2, 10)
+	const account = {
+		profile: {
+			id,
+			name: username,
+		},
+		type: 'offline',
+		offline: true,
+	}
+	const accounts = getOfflineAccounts()
+	accounts.push(account)
+	saveOfflineAccounts(accounts)
+	return account
+}
+
+/**
+ * Remove an offline account by id
+ */
+export function remove_offline_account(id) {
+	const accounts = getOfflineAccounts().filter(acc => acc.profile.id !== id)
+	saveOfflineAccounts(accounts)
+	const def = getDefaultOfflineUser()
+	if (def === id) clearDefaultOfflineUser()
+}
+
+/**
+ * List all offline accounts
+ */
+export function offline_accounts() {
+	return getOfflineAccounts()
+}
 
 // Example function:
 // User goes to auth_url to complete flow, and when completed, authenticate_await_completion() returns the credentials
@@ -30,7 +93,7 @@ import { invoke } from '@tauri-apps/api/core'
  * @property {string} user_code - The code to enter on the verification_uri page.
  */
 export async function login() {
-  return await invoke('plugin:auth|login')
+	return await invoke('plugin:auth|login')
 }
 
 /**
@@ -38,7 +101,9 @@ export async function login() {
  * @return {Promise<UUID | undefined>}
  */
 export async function get_default_user() {
-  return await invoke('plugin:auth|get_default_user')
+	const offlineDefault = getDefaultOfflineUser()
+	if (offlineDefault) return offlineDefault
+	return await invoke('plugin:auth|get_default_user')
 }
 
 /**
@@ -46,7 +111,14 @@ export async function get_default_user() {
  * @param {UUID} user
  */
 export async function set_default_user(user) {
-  return await invoke('plugin:auth|set_default_user', { user })
+	// If the ID corresponds to an offline account, store it locally and do not call backend
+	if (typeof user === 'string' && user.startsWith('offline-')) {
+		setDefaultOfflineUser(user)
+		return
+	}
+	// Otherwise, clear any offline default and set online default via backend
+	clearDefaultOfflineUser()
+	return await invoke('plugin:auth|set_default_user', { user })
 }
 
 /**
@@ -54,7 +126,7 @@ export async function set_default_user(user) {
  * @param {UUID} user
  */
 export async function remove_user(user) {
-  return await invoke('plugin:auth|remove_user', { user })
+	return await invoke('plugin:auth|remove_user', { user })
 }
 
 /**
@@ -62,5 +134,8 @@ export async function remove_user(user) {
  * @returns {Promise<Credential[]>}
  */
 export async function users() {
-  return await invoke('plugin:auth|get_users')
+	// Merge online and offline accounts
+	const online = await invoke('plugin:auth|get_users')
+	const offline = getOfflineAccounts()
+	return [...online, ...offline]
 }

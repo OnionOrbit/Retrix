@@ -99,25 +99,7 @@ fn main() {
                         DefaultPermissionRule::AllowAllCommands,
                     ),
             )
-            .plugin(
-                "minecraft-skins",
-                InlinedPlugin::new()
-                    .commands(&[
-                        "get_available_capes",
-                        "get_available_skins",
-                        "add_and_equip_custom_skin",
-                        "set_default_cape",
-                        "equip_skin",
-                        "remove_custom_skin",
-                        "unequip_skin",
-                        "normalize_skin_texture",
-                        "get_dragged_skin_data",
-                    ])
-                    .default_permission(
-                        DefaultPermissionRule::AllowAllCommands,
-                    ),
-            )
-            .plugin(
+                        .plugin(
                 "mr-auth",
                 InlinedPlugin::new()
                     .commands(&[
@@ -250,20 +232,7 @@ fn main() {
                         DefaultPermissionRule::AllowAllCommands,
                     ),
             )
-            .plugin(
-                "friends",
-                InlinedPlugin::new()
-                    .commands(&[
-                        "friends",
-                        "friend_statuses",
-                        "add_friend",
-                        "remove_friend",
-                    ])
-                    .default_permission(
-                        DefaultPermissionRule::AllowAllCommands,
-                    ),
-            )
-            .plugin(
+                        .plugin(
                 "worlds",
                 InlinedPlugin::new()
                     .commands(&[

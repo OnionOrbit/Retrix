@@ -22,16 +22,15 @@ impl ModrinthCredentials {
         let creds = Self::get_active(exec).await?;
 
         if let Some(mut creds) = creds {
-            // Refresh session if it expires in less than 1 hour
-            if creds.expires - Utc::now() < Duration::hours(1) {
+            if creds.expires < Utc::now() {
                 #[derive(Deserialize)]
-                struct SessionResponse {
+                struct Session {
                     session: String,
                 }
-    
-                match fetch_advanced(
+
+                let resp = fetch_advanced(
                     Method::POST,
-                    &format!("{}session/refresh", std::env::var("MODRINTH_API_URL").unwrap_or_else(|_| "https://api.modrinth.com/".to_string())),
+                    concat!(env!("MODRINTH_API_URL"), "session/refresh"),
                     None,
                     None,
                     Some(("Authorization", &*creds.session)),
@@ -40,24 +39,19 @@ impl ModrinthCredentials {
                     exec,
                 )
                 .await
-                {
-                    Ok(resp) => {
-                        if let Ok(session) = serde_json::from_slice::<SessionResponse>(&resp) {
-                            creds.session = session.session;
-                            creds.expires = Utc::now() + Duration::weeks(2);
-                            creds.upsert(exec).await?;
-                            Ok(Some(creds))
-                        } else {
-                            // Failed to parse response
-                            Self::remove(&creds.user_id, exec).await?;
-                            Ok(None)
-                        }
-                    },
-                    Err(_) => {
-                        // Failed to refresh session
-                        Self::remove(&creds.user_id, exec).await?;
-                        Ok(None)
-                    }
+                .ok()
+                .and_then(|resp| serde_json::from_slice::<Session>(&resp).ok());
+
+                if let Some(value) = resp {
+                    creds.session = value.session;
+                    creds.expires = Utc::now() + Duration::weeks(2);
+                    creds.upsert(exec).await?;
+
+                    Ok(Some(creds))
+                } else {
+                    Self::remove(&creds.user_id, exec).await?;
+
+                    Ok(None)
                 }
             } else {
                 Ok(Some(creds))
@@ -195,8 +189,8 @@ impl ModrinthCredentials {
     }
 }
 
-pub fn get_login_url() -> String {
-    format!("{}auth/sign-in", std::env::var("MODRINTH_URL").unwrap_or_else(|_| "https://modrinth.com/".to_string()))
+pub const fn get_login_url() -> &'static str {
+    concat!(env!("MODRINTH_URL"), "auth/sign-in")
 }
 
 pub async fn finish_login_flow(
@@ -227,7 +221,7 @@ async fn fetch_info(
 ) -> crate::Result<crate::state::cache::User> {
     let result = fetch_advanced(
         Method::GET,
-        &format!("{}user", std::env::var("MODRINTH_API_URL").unwrap_or_else(|_| "https://api.modrinth.com/".to_string())),
+        concat!(env!("MODRINTH_API_URL"), "user"),
         None,
         None,
         Some(("Authorization", token)),

@@ -28,16 +28,13 @@ pub use self::discord::*;
 mod minecraft_auth;
 pub use self::minecraft_auth::*;
 
-pub mod minecraft_skins;
+// Skins feature removed
 
 mod cache;
 pub use self::cache::*;
 
-mod friends;
-pub use self::friends::*;
 
-mod tunnel;
-pub use self::tunnel::*;
+// Friends/Tunnel features removed
 
 pub mod db;
 pub mod fs_watcher;
@@ -71,9 +68,7 @@ pub struct State {
     /// Process manager
     pub process_manager: ProcessManager,
 
-    /// Friends socket
-    pub friends_socket: FriendsSocket,
-
+    
     pub(crate) pool: SqlitePool,
 
     pub(crate) file_watcher: FileWatcher,
@@ -96,16 +91,7 @@ impl State {
                 tracing::error!("Error running discord RPC: {e}");
             }
 
-            let _ = state
-                .friends_socket
-                .connect(
-                    &state.pool,
-                    &state.api_semaphore,
-                    &state.process_manager,
-                )
-                .await;
-            let _ = FriendsSocket::socket_loop().await;
-        });
+                    });
 
         Ok(())
     }
@@ -164,8 +150,6 @@ impl State {
 
         let process_manager = ProcessManager::new();
 
-        let friends_socket = FriendsSocket::new();
-
         Ok(Arc::new(Self {
             directories,
             fetch_semaphore,
@@ -173,7 +157,6 @@ impl State {
             api_semaphore,
             discord_rpc,
             process_manager,
-            friends_socket,
             pool,
             file_watcher,
         }))

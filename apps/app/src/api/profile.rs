@@ -244,14 +244,16 @@ pub async fn profile_get_pack_export_candidates(
     Ok(candidates)
 }
 
-// Run minecraft using a profile using the default credentials
-// Returns the UUID, which can be used to poll
-// for the actual Child in the state.
-// invoke('plugin:profile|profile_run', path)
+// Run minecraft using a profile, optionally with a cracked/offline username
+// If username is Some, launch in offline mode with that username
+// invoke('plugin:profile|profile_run', path, username)
 #[tauri::command]
-pub async fn profile_run(path: &str) -> Result<ProcessMetadata> {
-    let process = profile::run(path, QuickPlayType::None).await?;
-
+pub async fn profile_run(path: &str, username: Option<String>) -> Result<ProcessMetadata> {
+    let process = if let Some(name) = username {
+        profile::run_offline(path, &name, QuickPlayType::None).await?
+    } else {
+        profile::run(path, QuickPlayType::None).await?
+    };
     Ok(process)
 }
 

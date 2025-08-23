@@ -57,7 +57,7 @@ async fn initialize_state(app: tauri::AppHandle) -> api::Result<()> {
                     current_version: update.current_version.clone(),
                 },
                 1.0,
-                "Updating Modrinth App...",
+                "Updating Retrix...",
             )
             .await?;
 
@@ -160,7 +160,7 @@ fn main() {
     */
     let _log_guard = theseus::start_logger();
 
-    tracing::info!("Initialized tracing subscriber. Loading Modrinth App!");
+    tracing::info!("Initialized tracing subscriber. Loading Retrix!");
 
     let mut builder = tauri::Builder::default();
 
@@ -249,7 +249,6 @@ fn main() {
         .plugin(api::logs::init())
         .plugin(api::jre::init())
         .plugin(api::metadata::init())
-        .plugin(api::minecraft_skins::init())
         .plugin(api::pack::init())
         .plugin(api::process::init())
         .plugin(api::profile::init())
@@ -259,8 +258,8 @@ fn main() {
         .plugin(api::utils::init())
         .plugin(api::cache::init())
         .plugin(api::ads::init())
-        .plugin(api::friends::init())
         .plugin(api::worlds::init())
+        // Friends and Skins features removed
         .invoke_handler(tauri::generate_handler![
             initialize_state,
             is_dev,
@@ -313,7 +312,7 @@ fn main() {
                     DialogBuilder::message()
                         .set_level(MessageLevel::Error)
                         .set_title("Initialization error")
-                        .set_text("Your Microsoft Edge WebView2 installation is corrupt.\n\nMicrosoft Edge WebView2 is required to run Modrinth App.\n\nLearn how to repair it at https://support.modrinth.com/en/articles/8797765-corrupted-microsoft-edge-webview2-installation")
+                        .set_text("Your Microsoft Edge WebView2 installation is corrupt.\n\nMicrosoft Edge WebView2 is required to run Retrix.\n\nLearn how to repair it at https://support.modrinth.com/en/articles/8797765-corrupted-microsoft-edge-webview2-installation")
                         .alert()
                         .show()
                         .unwrap();

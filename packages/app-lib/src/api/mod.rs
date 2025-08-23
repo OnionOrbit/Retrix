@@ -1,12 +1,11 @@
 //! API for interacting with Theseus
 pub mod cache;
-pub mod friends;
 pub mod handler;
 pub mod jre;
 pub mod logs;
 pub mod metadata;
 pub mod minecraft_auth;
-pub mod minecraft_skins;
+// Skins feature removed
 pub mod mr_auth;
 pub mod pack;
 pub mod process;
@@ -22,7 +21,7 @@ pub mod data {
         Hooks, JavaVersion, LinkedData, MemorySettings, ModLoader,
         ModrinthCredentials, Organization, ProcessMetadata, ProfileFile,
         Project, ProjectType, SearchResult, SearchResults, Settings,
-        TeamMember, Theme, User, UserFriend, Version, WindowSize,
+        TeamMember, Theme, User, Version, WindowSize,
     };
     pub use ariadne::users::UserStatus;
 }
@@ -35,9 +34,6 @@ pub mod prelude {
         jre, metadata, minecraft_auth, mr_auth, pack, process,
         profile::{self, Profile, create},
         settings,
-        util::{
-            io::{IOError, canonicalize},
-            network::tcp_listen_any_loopback,
-        },
+        util::io::{IOError, canonicalize},
     };
 }

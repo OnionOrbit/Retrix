@@ -353,9 +353,7 @@
   "project.about.links.donate.generic": {
     "defaultMessage": "Donate"
   },
-  "project.about.links.donate.github": {
-    "defaultMessage": "Sponsor on GitHub"
-  },
+
   "project.about.links.donate.kofi": {
     "defaultMessage": "Donate on Ko-fi"
   },

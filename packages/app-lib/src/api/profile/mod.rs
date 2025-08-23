@@ -1,4 +1,66 @@
-//! Theseus profile management interface
+use uuid::Uuid;
+use chrono::{Utc, Duration};
+/// Run Minecraft in offline/cracked mode with a given username
+#[tracing::instrument]
+pub async fn run_offline(
+    path: &str,
+    username: &str,
+    quick_play_type: QuickPlayType,
+) -> crate::Result<ProcessMetadata> {
+    let state = State::get().await?;
+    let profile = get(path).await?.ok_or_else(|| {
+        crate::ErrorKind::OtherError(format!(
+            "Tried to run a nonexistent or unloaded profile at path {path}!"
+        ))
+    })?;
+
+    // Generate offline UUID (same as Minecraft's offline UUID algorithm)
+    let uuid = Uuid::new_v3(&Uuid::NAMESPACE_DNS, format!("OfflinePlayer:{}", username).as_bytes());
+
+    let offline_profile = crate::state::MinecraftProfile {
+        id: uuid,
+        name: username.to_string(),
+        skins: vec![],
+        capes: vec![],
+        fetch_time: None,
+    };
+
+    let credentials = Credentials {
+        offline_profile,
+        access_token: "offline".to_string(),
+        refresh_token: "offline".to_string(),
+        expires: Utc::now() + Duration::days(3650), // Far future
+        active: true,
+    };
+
+    let settings = crate::data::Settings::get(&state.pool).await?;
+    let java_args = profile.extra_launch_args.clone().unwrap_or(settings.extra_launch_args);
+    let wrapper = profile.hooks.wrapper.clone().or(settings.hooks.wrapper).filter(|hook_command| !hook_command.is_empty());
+    let memory = profile.memory.unwrap_or(settings.memory);
+    let resolution = profile.game_resolution.unwrap_or(settings.game_resolution);
+    let env_args = profile.custom_env_vars.clone().unwrap_or(settings.custom_env_vars);
+    let post_exit_hook = profile.hooks.post_exit.clone().or(settings.hooks.post_exit).filter(|hook_command| !hook_command.is_empty());
+    let mut mc_set_options: Vec<(String, String)> = vec![];
+    if let Some(fullscreen) = profile.force_fullscreen {
+        mc_set_options.push(("fullscreen".to_string(), fullscreen.to_string()));
+    } else if settings.force_fullscreen {
+        mc_set_options.push(("fullscreen".to_string(), "true".to_string()));
+    }
+
+    crate::launcher::launch_minecraft(
+        &java_args,
+        &env_args,
+        &mc_set_options,
+        &wrapper,
+        &memory,
+        &resolution,
+        &credentials,
+        post_exit_hook,
+        &profile,
+        quick_play_type,
+    ).await
+}
+/// Theseus profile management interface
 
 use crate::event::LoadingBarType;
 use crate::event::emit::{

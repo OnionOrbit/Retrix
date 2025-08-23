@@ -222,7 +222,7 @@
     "message": "{loader} is not available for Minecraft {version}. Try another mod loader."
   },
   "instance.settings.tabs.installation.no-modpack-found": {
-    "message": "This instance is linked to a modpack, but the modpack could not be found on Modrinth."
+  "message": "This instance is linked to a modpack, but the modpack could not be found on Retrix."
   },
   "instance.settings.tabs.installation.platform": {
     "message": "Platform"

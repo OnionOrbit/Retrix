@@ -386,9 +386,7 @@
   "layout.footer.about.changelog": {
     "message": "Changelog"
   },
-  "layout.footer.about.news": {
-    "message": "News"
-  },
+
   "layout.footer.about.rewards-program": {
     "message": "Rewards Program"
   },
@@ -1154,9 +1152,7 @@
   "servers.plan.medium.name": {
     "message": "Medium"
   },
-  "servers.plan.small.description": {
-    "message": "Perfect for 1–5 friends with a few light mods."
-  },
+
   "servers.plan.small.name": {
     "message": "Small"
   },
